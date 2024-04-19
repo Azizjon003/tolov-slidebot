@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+enum RoleEnum {
+  ADMIN
+  USER
+}
+
+model User {
+  id       String  @id @default(uuid())
+  username  String?
+  name      String?
+  role      RoleEnum @default(USER)      
+  telegram_id String @unique
+  isActive  Boolean @default(true)
+  chat         Chat[]
+  wallet       wallet?
+  model_id     String?
+  model        gptModel? @relation(fields: [model_id], references: [id])
+  walletRequest walletRequest[]
+  webUser      webUser?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Chat {
+  id       String  @id @default(uuid())
+  name     String?
+  user     User @relation(fields: [user_id], references: [id])
+  pageCount Int @default(5)
+  plans     Plan[]
+  user_id  String
+  description Description[]
+  language String?
+  lang     String?
+  checkUser String?
+  model_id String?
+  model   gptModel? @relation(fields: [model_id], references: [id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Plan {
+  id     String  @id @default(uuid())
+  name   String
+  chat_id String
+  chat    Chat @relation(fields: [chat_id], references: [id])
+  description Description[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Description {
+  id       String  @id @default(uuid())
+  name     String?
+  content  Json[]
+  plan_id  String
+  plan       Plan @relation(fields: [plan_id], references: [id])
+  chat     Chat @relation(fields: [chat_id], references: [id])
+  chat_id  String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+
+model wallet {
+  id       String  @id @default(uuid())
+  user_id  String @unique
+  user     User @relation(fields: [user_id], references: [id])
+  balance  Int @default(0)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+
+
+model plansSlides {
+  id      String  @id @default(uuid())
+  price   Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+
+model invitedUsers {
+  id       String  @id @default(uuid())
+  user_id  String? @unique
+  invited_user_id String
+  isActive Boolean @default(false)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+enum walletRequestStatus {
+  PENDING
+  APPROVED
+  DECLINED
+}
+
+model walletRequest {
+  id       String  @id @default(uuid())
+  user_id  String
+  user     User @relation(fields: [user_id], references: [id])
+  amount   Int
+  status   walletRequestStatus
+  message_id String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model gptModel {
+  id      String  @id @default(uuid())
+  name    String
+  chats   Chat[]
+  users   User[]
+}
+
+
+model webUser {
+  id     String @id @default(cuid())
+  name   String
+  email  String?
+  user_id String @unique
+  user   User @relation(fields: [user_id], references: [id])
+  session session[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+
+model session {
+  id       String  @id @default(uuid())
+  user_id  String @unique
+  user     webUser @relation(fields: [user_id], references: [id])
+  token    String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
