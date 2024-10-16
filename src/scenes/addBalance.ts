@@ -3,6 +3,9 @@ import enabled from "../utils/enabled";
 import prisma from "../../prisma/prisma";
 import { keyboards } from "../utils/keyboards";
 import { externalId } from "./start";
+import { sendTelegramMessage } from "../utils/sendSmsFunction";
+
+const botTokenNew = String(process.env.BOT_TOKEN);
 const scene = new Scenes.BaseScene("addBalance");
 
 scene.hears(/^\d+$/, async (ctx: any) => {
@@ -99,6 +102,10 @@ scene.action("confirm", async (ctx: any) => {
   });
 
   let text = `Foydalanuvchi ${checkUser.username}\n Summa:${balance} tasdiqlandi.Oldingi balansi ${checkUser.wallet?.balance}`;
+
+  const texts = `Assalomu alaykum balansingizga ${balance} so'm qo'shildi. Jami balansingiz ${walletUpdate.balance} so'm. \n\n`;
+
+  sendTelegramMessage(botTokenNew, checkUser.telegram_id, texts);
   ctx.reply(text);
   return ctx.scene.enter("start");
 });
