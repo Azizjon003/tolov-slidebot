@@ -49,6 +49,58 @@ scene.hears(/^[0-9]{1,10}$/, async (ctx: any) => {
 
   return ctx.scene.enter("addBalance");
 });
+scene.on("photo", async (ctx: any) => {
+  try {
+    // Forward qilingan rasmni tekshirish
+    if (!ctx.message.forward_from) {
+      return ctx.reply("Iltimos, rasmni forward qiling");
+    }
+
+    const forwardedFromId = String(ctx.message.forward_from.id);
+
+    // Rasmni yuborgan foydalanuvchini bazadan tekshirish
+    const checkUser = await prisma.user.findFirst({
+      where: {
+        telegram_id: forwardedFromId,
+      },
+      include: {
+        wallet: true,
+      },
+    });
+
+    if (!checkUser) {
+      return ctx.reply(
+        "Bu foydalanuvchi bazada mavjud emas \n Qaytadan urinib ko'ring"
+      );
+    }
+
+    const text = `Foydalanuvchi ${checkUser?.username}
+Balansi: ${checkUser.wallet?.balance}
+`;
+
+    await ctx.telegram.sendMessage(ctx.from.id, text, {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Bekor qilish",
+              callback_data: "cancel",
+            },
+          ],
+        ],
+      },
+    });
+
+    ctx.session.user = {
+      checkUserId: forwardedFromId,
+    };
+
+    return ctx.scene.enter("addBalance");
+  } catch (error) {
+    console.error("Photo handler error:", error);
+    return ctx.reply("Xatolik yuz berdi. Iltimos qaytadan urinib ko'ring");
+  }
+});
 
 scene.hears("Bugungi tushunmi ko'rish", async (ctx) => {
   const userId = String(ctx.from.id);
