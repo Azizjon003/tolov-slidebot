@@ -48,6 +48,7 @@ async function exportWalletRequestsToExcel() {
       user: request.user.name,
       amount: request.amount,
       id: request.id,
+      telegram_id: request.user.telegram_id,
     });
   });
 
