@@ -30,6 +30,7 @@ async function exportWalletRequestsToExcel() {
     { header: "Foydalanuvchi", key: "user", width: 30 },
     { header: "Summa", key: "amount", width: 15 },
     { header: "ID", key: "id", width: 40 },
+    { header: "Telegram ID", key: "telegram_id", width: 20 },
   ];
 
   // Header stilini sozlash
